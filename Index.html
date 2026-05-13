@@ -235,8 +235,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;min-h
   <div class="card" style="background:var(--ink);border-color:var(--ink)">
     <div class="card-title" style="color:#fff;font-size:15px;margin-bottom:10px">📄 Script para Apps Script</div>
     <div class="script-box" id="scriptBox">function doPost(e) {
-  var sheet = SpreadsheetApp
-    .getActiveSpreadsheet()
+  var sheet = SpreadsheetApp.openById('TU_SPREADSHEET_ID_AQUI')
     .getSheetByName("Horas");
   var d = JSON.parse(e.postData.contents);
   sheet.appendRow([
@@ -375,7 +374,7 @@ async function submitEntry() {
   let sent = false;
   if (url) {
     try {
-      await fetch(url, { method:'POST', mode:'no-cors',
+      await fetch(url, { method:'POST', mode:'cors',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload) });
       sent = true;
