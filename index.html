@@ -374,8 +374,8 @@ async function submitEntry() {
   let sent = false;
   if (url) {
     try {
-      await fetch(url, { method:'POST', mode:'cors',
-        headers:{'Content-Type':'application/json'},
+      await fetch(url, { method:'POST', mode:'cors', redirect:'follow',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
         body: JSON.stringify(payload) });
       sent = true;
     } catch(e) { sent = false; }
