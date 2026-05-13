@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Fleet · Registro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
+:root {
+  --bg:#f0ede8; --surface:#ffffff; --surface2:#f7f4f0; --border:#e0dbd3;
+  --ink:#1a1714; --ink2:#5a5550; --accent:#d4420a; --accent2:#1a3a6b;
+  --ruta:#1a3a6b; --mant:#c47e0a; --rep:#d4420a; --aux:#2a7a4a; --otro:#6a4a8a;
+  --success:#2a7a4a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--ink);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:32px;height:32px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:2px}
+.brand-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fff;letter-spacing:1px;text-transform:uppercase}
+.brand-sub{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;margin-top:-2px}
+.header-right{text-align:right}
+.header-clock{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:rgba(255,255,255,.8)}
+.header-driver{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+
+/* NAV */
+.nav{background:var(--ink);border-top:1px solid rgba(255,255,255,.08);display:flex;padding:0 8px}
+.nav-btn{flex:1;padding:10px 4px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* PAGES */
+.page{display:none;padding:20px 16px 40px}
+.page.active{display:block}
+
+.label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+
+/* DRIVER BADGE */
+.driver-badge{background:var(--surface);border:1.5px solid var(--accent2);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.driver-avatar{width:38px;height:38px;background:var(--accent2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.driver-info{}
+.driver-name-big{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;color:var(--accent2)}
+.driver-role{font-size:12px;color:var(--ink2);margin-top:1px}
+.driver-not-set{color:var(--accent);font-size:12px;margin-top:2px}
+
+/* CATS */
+.cat-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.cat-pill{border:2px solid var(--border);border-radius:6px;padding:12px 10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.cat-pill:active{transform:scale(.97)}
+.cat-pill.sel{border-color:var(--cat-c);background:color-mix(in srgb,var(--cat-c) 8%,#fff)}
+.cat-pill[data-c="ruta"] {--cat-c:var(--ruta)}
+.cat-pill[data-c="mant"] {--cat-c:var(--mant)}
+.cat-pill[data-c="rep"]  {--cat-c:var(--rep)}
+.cat-pill[data-c="aux"]  {--cat-c:var(--aux)}
+.cat-pill[data-c="otro"] {--cat-c:var(--otro)}
+.cat-dot{width:10px;height:10px;border-radius:50%;background:var(--cat-c);flex-shrink:0}
+.cat-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;line-height:1.2;color:var(--ink)}
+.cat-pill.sel .cat-label{color:var(--cat-c)}
+
+/* FIELDS */
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;padding:11px 12px;font-family:'Barlow',sans-serif;font-size:15px;color:var(--ink);outline:none;transition:border-color .15s;width:100%;-webkit-appearance:none;appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field input[type="time"]{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;text-align:center;letter-spacing:1px}
+.field textarea{resize:none;font-size:14px;line-height:1.5}
+
+.duration-chip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.dur-label{font-size:12px;color:var(--ink2)}
+.dur-value{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--accent)}
+
+/* BUTTONS */
+.btn-submit{width:100%;padding:17px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:active{background:var(--accent);transform:scale(.98)}
+.btn-submit.loading{opacity:.6;pointer-events:none}
+.btn-save{width:100%;padding:14px;background:var(--accent2);color:#fff;border:none;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:4px}
+.btn-save:active{opacity:.8}
+
+.flash{display:none;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:14px;font-weight:600;align-items:center;gap:10px}
+.flash.show{display:flex}
+.flash.ok{background:color-mix(in srgb,var(--success) 10%,#fff);border:1px solid var(--success);color:var(--success)}
+.flash.warn{background:#fff8e6;border:1px solid #e8b84b;color:#7a5a00}
+
+.config-banner{background:#fff8e6;border:1.5px solid #e8b84b;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#7a5a00;line-height:1.5}
+.config-banner b{color:#5a3f00}
+
+/* SETTINGS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:16px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;letter-spacing:.5px;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--ink2);margin-bottom:16px}
+.settings-field{margin-bottom:14px}
+.settings-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.settings-field input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;padding:12px 14px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--ink);outline:none}
+.settings-field input:focus{border-color:var(--accent)}
+
+/* LOG */
+.log-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.log-stripe{width:3px;border-radius:3px;align-self:stretch;min-height:36px;flex-shrink:0}
+.log-body{flex:1;min-width:0}
+.log-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.log-cat{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px}
+.log-dur{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--ink2);white-space:nowrap}
+.log-times{font-size:12px;color:var(--ink2);margin-top:2px}
+.log-note{font-size:12px;color:var(--ink2);margin-top:3px;font-style:italic}
+.log-meta{font-size:11px;color:#aaa;margin-top:2px}
+.empty{text-align:center;padding:40px 0;color:var(--ink2);font-size:14px}
+
+/* SCRIPT BOX */
+.script-box{background:rgba(255,255,255,.08);border-radius:6px;padding:14px;font-family:monospace;font-size:11.5px;color:#c8f0c8;line-height:1.7;white-space:pre-wrap;overflow-x:auto}
+.btn-copy{margin-top:10px;width:100%;padding:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;border-radius:8px;padding:12px 20px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div class="brand-mark">🚚</div>
+    <div>
+      <div class="brand-name">Smart Fleet</div>
+      <div class="brand-sub">Control de Horas</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-clock" id="clock">--:--</div>
+    <div class="header-driver" id="headerDriver">Sin configurar</div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-btn active" onclick="switchPage('registro')">📋 Registro</div>
+  <div class="nav-btn" onclick="switchPage('recientes')">🕐 Recientes</div>
+  <div class="nav-btn" onclick="switchPage('ajustes')">⚙️ Ajustes</div>
+</div>
+
+<!-- REGISTRO -->
+<div class="page active" id="page-registro">
+
+  <div id="configWarning" class="config-banner" style="display:none">
+    ⚠️ <b>Falta configurar.</b> Ve a <b>Ajustes</b>, escribe tu nombre y pega la URL del script.
+  </div>
+
+  <div class="flash ok" id="flash"></div>
+
+  <!-- Driver badge -->
+  <div class="driver-badge" id="driverBadge">
+    <div class="driver-avatar">👤</div>
+    <div class="driver-info">
+      <div class="driver-name-big" id="badgeName">—</div>
+      <div class="driver-role">Conductor · Smart Transportation LLC</div>
+      <div class="driver-not-set" id="badgeWarn" style="display:none">⚠ Ve a Ajustes y configura tu nombre</div>
+    </div>
+  </div>
+
+  <div class="label">Tipo de actividad</div>
+  <div class="cat-wrap">
+    <div class="cat-pill" data-c="ruta" onclick="selCat(this)"><div class="cat-dot"></div><div class="cat-label">🗺️ En Ruta</div></div>
+    <div class="cat-pill" data-c="mant" onclick="selCat(this)"><div class="cat-dot"></div><div class="cat-label">🔩 Mantenimiento</div></div>
+    <div class="cat-pill" data-c="rep"  onclick="selCat(this)"><div class="cat-dot"></div><div class="cat-label">🔧 Reparación</div></div>
+    <div class="cat-pill" data-c="aux"  onclick="selCat(this)"><div class="cat-dot"></div><div class="cat-label">🆘 Auxiliando</div></div>
+    <div class="cat-pill" data-c="otro" onclick="selCat(this)" style="grid-column:span 2"><div class="cat-dot"></div><div class="cat-label">📌 Otro</div></div>
+  </div>
+
+  <div class="field">
+    <div class="field-label">Fecha</div>
+    <input type="date" id="dateInput">
+  </div>
+
+  <div class="label">Horas de la actividad</div>
+  <div class="time-row">
+    <div class="field">
+      <div class="field-label">▶ Inicio</div>
+      <input type="time" id="timeStart" oninput="calcDuration()">
+    </div>
+    <div class="field">
+      <div class="field-label">⏹ Fin</div>
+      <input type="time" id="timeEnd" oninput="calcDuration()">
+    </div>
+  </div>
+
+  <div class="duration-chip">
+    <span class="dur-label">Duración calculada</span>
+    <span class="dur-value" id="durVal">—</span>
+  </div>
+
+  <div class="field">
+    <div class="field-label">Descripción / Nota</div>
+    <textarea id="noteInput" rows="3" placeholder="Ej: Cubrí ruta de Miguel en 38-22 · Cambié aceite en Ford Transit 8Z65519 · Auxilié a Carlos, pinchazo en I-280..."></textarea>
+  </div>
+
+  <button class="btn-submit" id="submitBtn" onclick="submitEntry()">
+    <span id="btnContent">💾 Guardar registro</span>
+  </button>
+</div>
+
+<!-- RECIENTES -->
+<div class="page" id="page-recientes">
+  <div class="label">Últimos registros en este dispositivo</div>
+  <div id="logList"></div>
+</div>
+
+<!-- AJUSTES -->
+<div class="page" id="page-ajustes">
+
+  <div class="card">
+    <div class="card-title">Mi perfil</div>
+    <div class="card-sub">Este nombre aparecerá en todos tus registros en la planilla.</div>
+
+    <div class="settings-field">
+      <label>Tu nombre completo</label>
+      <input type="text" id="driverName" placeholder="Ej: Carlos Méndez">
+    </div>
+    <div class="settings-field">
+      <label>URL del Apps Script (Google Sheets)</label>
+      <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <button class="btn-save" onclick="saveSettings()">Guardar ajustes</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:16px;margin-bottom:10px">📋 Cómo conectarlo (una sola vez)</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8">
+      <b style="color:var(--ink)">1.</b> Abre la planilla SmartFleet en Google Sheets<br>
+      <b style="color:var(--ink)">2.</b> Agrega tu nombre exacto en la hoja <b>Conductores</b><br>
+      <b style="color:var(--ink)">3.</b> Menú: <b>Extensiones → Apps Script</b><br>
+      <b style="color:var(--ink)">4.</b> Pega el script de abajo → <b>Implementar → Nueva implementación</b><br>
+      <b style="color:var(--ink)">5.</b> Acceso: <b>"Cualquier persona"</b> → Copia la URL → pégala arriba
+    </div>
+  </div>
+
+  <div class="card" style="background:var(--ink);border-color:var(--ink)">
+    <div class="card-title" style="color:#fff;font-size:15px;margin-bottom:10px">📄 Script para Apps Script</div>
+    <div class="script-box" id="scriptBox">function doPost(e) {
+  var sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName("Horas");
+  var d = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    d.fecha,
+    d.conductor,
+    d.actividad,
+    d.inicio,
+    d.fin,
+    d.minutos,
+    d.nota,
+    new Date()
+  ]);
+  return ContentService
+    .createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({status:"ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+    <button class="btn-copy" onclick="copyScript()">📋 COPIAR SCRIPT</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_LOG    = 'sf_log_v2';
+const LS_URL    = 'sf_scriptUrl';
+const LS_DRIVER = 'sf_driver';
+
+const CAT_INFO = {
+  ruta:  {label:'En Ruta',       color:'#1a3a6b'},
+  mant:  {label:'Mantenimiento', color:'#c47e0a'},
+  rep:   {label:'Reparación',    color:'#d4420a'},
+  aux:   {label:'Auxiliando',    color:'#2a7a4a'},
+  otro:  {label:'Otro',          color:'#6a4a8a'},
+};
+
+let selectedCat = null;
+
+// ── INIT
+window.onload = () => {
+  document.getElementById('dateInput').value = todayISO();
+  document.getElementById('scriptUrl').value  = localStorage.getItem(LS_URL)    || '';
+  document.getElementById('driverName').value = localStorage.getItem(LS_DRIVER) || '';
+  updateDriverBadge();
+  checkConfigWarning();
+  updateClock();
+  setInterval(updateClock, 1000);
+};
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+}
+
+function updateDriverBadge() {
+  const name = localStorage.getItem(LS_DRIVER) || '';
+  document.getElementById('badgeName').textContent = name || '—';
+  document.getElementById('headerDriver').textContent = name || 'Sin configurar';
+  document.getElementById('badgeWarn').style.display = name ? 'none' : 'block';
+}
+
+// ── PAGES
+function switchPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`page-${id}`).classList.add('active');
+  ['registro','recientes','ajustes'].forEach((p,i) => {
+    if(p===id) document.querySelectorAll('.nav-btn')[i].classList.add('active');
+  });
+  if (id === 'recientes') renderLog();
+}
+
+// ── CAT
+function selCat(el) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedCat = el.dataset.c;
+}
+
+// ── DURATION
+function calcDuration() {
+  const s = document.getElementById('timeStart').value;
+  const e = document.getElementById('timeEnd').value;
+  if (!s || !e) { document.getElementById('durVal').textContent = '—'; return null; }
+  const [sh,sm] = s.split(':').map(Number);
+  const [eh,em] = e.split(':').map(Number);
+  let mins = (eh*60+em)-(sh*60+sm);
+  if (mins < 0) mins += 1440;
+  document.getElementById('durVal').textContent = fmtMin(mins);
+  return mins;
+}
+
+// ── SUBMIT
+async function submitEntry() {
+  const driver = localStorage.getItem(LS_DRIVER) || '';
+  const url    = localStorage.getItem(LS_URL) || '';
+  const date   = document.getElementById('dateInput').value;
+  const start  = document.getElementById('timeStart').value;
+  const end    = document.getElementById('timeEnd').value;
+  const note   = document.getElementById('noteInput').value.trim();
+
+  if (!driver)       { showToast('⚠️ Ve a Ajustes y configura tu nombre primero'); return; }
+  if (!selectedCat)  { showToast('⚠️ Selecciona el tipo de actividad'); return; }
+  if (!start)        { showToast('⚠️ Ingresa la hora de inicio'); return; }
+  if (!end)          { showToast('⚠️ Ingresa la hora de fin'); return; }
+  const mins = calcDuration();
+  if (!mins || mins <= 0) { showToast('⚠️ La hora de fin debe ser posterior al inicio'); return; }
+
+  const payload = {
+    fecha:     date,
+    conductor: driver,
+    actividad: CAT_INFO[selectedCat].label,
+    inicio:    start,
+    fin:       end,
+    minutos:   mins,
+    nota:      note
+  };
+
+  saveLocal(payload, selectedCat);
+
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  document.getElementById('btnContent').textContent = '⏳ Enviando...';
+
+  let sent = false;
+  if (url) {
+    try {
+      await fetch(url, { method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload) });
+      sent = true;
+    } catch(e) { sent = false; }
+  }
+
+  btn.classList.remove('loading');
+  document.getElementById('btnContent').textContent = '💾 Guardar registro';
+
+  const f = document.getElementById('flash');
+  if (sent) {
+    f.className = 'flash ok show';
+    f.textContent = '✅ Registro enviado a la planilla de Google.';
+  } else if (url) {
+    f.className = 'flash warn show';
+    f.textContent = '⚠ Guardado localmente. Sin conexión con la planilla.';
+  } else {
+    f.className = 'flash warn show';
+    f.textContent = '⚠ Guardado localmente. Configura la URL del script en Ajustes.';
+  }
+  setTimeout(() => f.classList.remove('show'), 4000);
+  resetForm();
+}
+
+function resetForm() {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('sel'));
+  selectedCat = null;
+  document.getElementById('timeStart').value = '';
+  document.getElementById('timeEnd').value   = '';
+  document.getElementById('noteInput').value = '';
+  document.getElementById('durVal').textContent = '—';
+  document.getElementById('dateInput').value = todayISO();
+}
+
+// ── LOCAL LOG
+function saveLocal(payload, cat) {
+  const log = JSON.parse(localStorage.getItem(LS_LOG) || '[]');
+  log.unshift({...payload, cat, id: Date.now()});
+  if (log.length > 150) log.pop();
+  localStorage.setItem(LS_LOG, JSON.stringify(log));
+}
+
+function renderLog() {
+  const log = JSON.parse(localStorage.getItem(LS_LOG) || '[]');
+  const el = document.getElementById('logList');
+  if (!log.length) { el.innerHTML = '<div class="empty">Aún no hay registros en este dispositivo.</div>'; return; }
+  el.innerHTML = log.map(e => {
+    const info = CAT_INFO[e.cat] || {label: e.actividad, color:'#888'};
+    return `
+    <div class="log-item">
+      <div class="log-stripe" style="background:${info.color}"></div>
+      <div class="log-body">
+        <div class="log-top">
+          <div class="log-cat" style="color:${info.color}">${info.label}</div>
+          <div class="log-dur">${fmtMin(e.minutos)}</div>
+        </div>
+        <div class="log-times">${e.inicio} → ${e.fin}</div>
+        <div class="log-meta">${e.fecha} · ${e.conductor}</div>
+        ${e.nota ? `<div class="log-note">"${e.nota}"</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SETTINGS
+function saveSettings() {
+  const url    = document.getElementById('scriptUrl').value.trim();
+  const driver = document.getElementById('driverName').value.trim();
+  if (!driver) { showToast('⚠️ Escribe tu nombre antes de guardar'); return; }
+  localStorage.setItem(LS_URL, url);
+  localStorage.setItem(LS_DRIVER, driver);
+  updateDriverBadge();
+  checkConfigWarning();
+  showToast('✅ Ajustes guardados');
+}
+
+function checkConfigWarning() {
+  const url    = localStorage.getItem(LS_URL) || '';
+  const driver = localStorage.getItem(LS_DRIVER) || '';
+  document.getElementById('configWarning').style.display =
+    (!url || !driver) ? 'block' : 'none';
+}
+
+function copyScript() {
+  const txt = document.getElementById('scriptBox').textContent;
+  navigator.clipboard.writeText(txt).then(()=>showToast('✅ Script copiado')).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('✅ Script copiado');
+  });
+}
+
+function fmtMin(m) {
+  const h = Math.floor(m/60), mn = m%60;
+  return `${h}h ${String(mn).padStart(2,'0')}m`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
